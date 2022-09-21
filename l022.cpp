@@ -4,6 +4,7 @@
 #include <fstream>
 #include <cctype>
 #include <random>
+#include <string>
 
 using namespace std;
 
@@ -191,6 +192,7 @@ namespace ppm
             s2 = other.calc_slope();
             x = (s1 * this->x1 - s2 * other.x1_pos() + other.y1_pos() - this->y1) / (s1 - s2);
             y = s1 * (x - this->x1) + this->y1;
+            return Point(x, y);
         }
 
     private:
@@ -392,7 +394,7 @@ namespace gen_quad
         ofstream out("points.txt");
 
         // Write data
-        out << setprecision(17) << "("
+        out << fixed << setprecision(17) << "("
             << p[0].xpos() << "," << p[0].ypos() << ") , ("
             << p[1].xpos() << "," << p[1].ypos() << ") , ("
             << p[2].xpos() << "," << p[2].ypos() << ") , ("
@@ -450,18 +452,52 @@ namespace smallest_square
     private:
         Point p1, p2, p3, p4;
     };
+
+    bool read_points(Point points[4])
+    {
+        ifstream point_file("points.txt");
+        string nums;
+        char line[50];
+        double x, y;
+
+        if (!point_file.is_open() & !point_file.getline(line, 50, '('))
+        {
+            return false;
+        }
+
+        for (int i = 0; i < 4; i++)
+        {
+            if (!point_file.getline(line, 50, '('))
+            {
+                return false;
+            }
+            nums = string(line);
+            x = stod(nums.substr(0, 19));
+            y = stod(nums.substr(20, 19));
+            points[i] = ppm::Point(x, y);
+        }
+        point_file.close();
+
+        return true;
+    }
+
+    void gen_squares(Point points[4], Square *s1, Square *s2)
+    {
+    }
 }
 
 int main()
 {
-    using ppm::Image;
-
     // Gen quad
+    gen_quad::gen_quad();
     // Read points
+    ppm::Point points[4];
+    smallest_square::read_points(points);
     // Gen all 6 squares
     // Find smallest
     // Output stuff
+    ppm::Image *image = new ppm::Image("output.ppm");
 
-    Image *image = new Image("output.ppm");
+    delete image;
     return 0;
 }
