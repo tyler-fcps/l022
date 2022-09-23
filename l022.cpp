@@ -114,8 +114,14 @@ namespace ppm
     class Line
     {
     public:
-        Line(double x1, double y1, double x2, double y2) : x1(x1), x2(x2), y1(y1), y2(y2)
+        Line() {}
+        Line(double x1, double y1, double x2, double y2) : x1(x1), x2(x2), y1(y1), y2(y2) {}
+        Line(Point p1, Point p2) : x1(p1.xpos()), x2(p2.xpos()), y1(p1.ypos()), y2(p2.ypos()) {}
+        Line(double x, double y, double slope) : x1(x), y1(y)
         {
+            this->x2 = x + 1;
+            this->y2 = y + slope;
+            this->extend(0, 1);
         }
         void draw(Image *image, int r, int g, int b)
         {
@@ -288,8 +294,6 @@ namespace ppm
             xoff = (this->x * (double)image->get_width());
             yoff = (this->y * (double)image->get_height());
 
-            cout << y << " " << xoff << " " << yoff << " " << this->r << endl;
-
             while (x <= y)
             {
                 if ((y2 - y2_new) >= ty)
@@ -414,9 +418,12 @@ namespace gen_quad
     }
 }
 
-namespace smallest_square
+namespace small
 {
     using gen_quad::Point;
+    using ppm::Circle;
+    using ppm::Image;
+    using ppm::Line;
 
     class Square
     {
@@ -481,8 +488,89 @@ namespace smallest_square
         return true;
     }
 
-    void gen_squares(Point points[4], Square *s1, Square *s2)
+    void gen_squares(Point points[4], Square &s1, Square &s2)
     {
+        auto gen_square = [&](Point e)
+        {
+            double slope = (e.ypos() - points[3].ypos()) / (e.xpos() - points[3].xpos());
+            double perp_slope = -1 / slope;
+            Line bottom(points[3].xpos(), points[3].ypos(), slope);
+            Line top(points[2].xpos(), points[2].ypos(), slope);
+            Line left(points[0].xpos(), points[0].ypos(), perp_slope);
+            Line right(points[1].xpos(), points[1].ypos(), perp_slope);
+            Point p1 = bottom.calc_intersect(left);
+            Point p2 = bottom.calc_intersect(right);
+            Point p3 = top.calc_intersect(left);
+            Point p4 = top.calc_intersect(right);
+            return Square(p1, p2, p3, p4);
+        };
+        // Assume E is below points[2]
+        // x = x3 - y2 + y1;
+        // y = y3 + x2 - x1;
+        Point e1 = Point(points[2].xpos() - points[1].ypos() + points[0].ypos(), points[2].ypos() + points[1].xpos() - points[0].xpos());
+        s1 = gen_square(e1);
+        // Assume E is above points[2]
+        // x = x3 + y2 - y1;
+        // y = y3 - x2 + x1;
+        Point e2 = Point(points[2].xpos() + points[1].ypos() - points[0].ypos(), points[2].ypos() - points[1].xpos() + points[0].xpos());
+        s2 = gen_square(e2);
+    }
+
+    void output_smallest_square()
+    {
+        // Read points
+        Point points[4];
+        read_points(points);
+        // Gen all 6 squares
+        Square squares[6];
+        for (int i = 0; i < 3; i++)
+        {
+            Point ps[] = {points[3], points[(i + 0) % 3], points[(i + 1) % 3], points[(i + 2) % 3]};
+            gen_squares(ps, squares[i * 2], squares[i * 2 + 1]);
+        }
+        // Find smallest
+        int smallest = 0;
+        double area = 1;
+        for (int i = 0; i < 6; i++)
+        {
+            double a = squares[i].calc_area();
+            if (a < area)
+            {
+                smallest = i;
+                area = a;
+            }
+        }
+        auto ssquare = squares[smallest];
+        // Output stuff
+        Image *image = new Image("output.ppm");
+        // Draw points
+        for (int i = 0; i < 4; i++)
+        {
+            Circle p(points[i].xpos(), points[i].ypos(), 3.0 / 800.0);
+            p.draw(image, 255, 0, 0);
+        }
+        Circle(ssquare.get_p1().xpos(), ssquare.get_p1().ypos(), 5.0 / 800.0).draw(image, 255, 255, 0);
+        Circle(ssquare.get_p2().xpos(), ssquare.get_p2().ypos(), 5.0 / 800.0).draw(image, 255, 255, 0);
+        Circle(ssquare.get_p3().xpos(), ssquare.get_p3().ypos(), 5.0 / 800.0).draw(image, 255, 255, 0);
+        Circle(ssquare.get_p4().xpos(), ssquare.get_p4().ypos(), 5.0 / 800.0).draw(image, 255, 255, 0);
+        // Draw squares
+        Line l1, l2, l3, l4;
+        l1 = Line(ssquare.get_p1(), ssquare.get_p2());
+        l1.extend(0, 1);
+        l1.draw(image, 0, 255, 0);
+        l2 = Line(ssquare.get_p2(), ssquare.get_p4());
+        l2.extend(0, 1);
+        l2.draw(image, 0, 255, 125);
+        l3 = Line(ssquare.get_p3(), ssquare.get_p4());
+        l3.extend(0, 1);
+        l3.draw(image, 0, 255, 255);
+        l4 = Line(ssquare.get_p3(), ssquare.get_p1());
+        l4.extend(0, 1);
+        l4.draw(image, 255, 255, 0);
+        // Output PPM
+        image->output();
+        // Close resources
+        delete image;
     }
 }
 
@@ -490,14 +578,8 @@ int main()
 {
     // Gen quad
     gen_quad::gen_quad();
-    // Read points
-    ppm::Point points[4];
-    smallest_square::read_points(points);
-    // Gen all 6 squares
-    // Find smallest
-    // Output stuff
-    ppm::Image *image = new ppm::Image("output.ppm");
-
-    delete image;
+    // Smallest square
+    small::output_smallest_square();
+    //
     return 0;
 }
