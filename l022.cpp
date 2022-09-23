@@ -524,7 +524,9 @@ namespace small
         Square squares[6];
         Line l1, l2, l3, l4;
         int smallest = 0;
-        double area = 1;
+        int biggest = 0;
+        double area_s = 1;
+        double area_b = 0;
         Image *image = new Image("output.ppm");
         ofstream output("output.txt");
         output << fixed << setprecision(17);
@@ -563,37 +565,48 @@ namespace small
             Point ps[] = {points[3], points[(i + 0) % 3], points[(i + 1) % 3], points[(i + 2) % 3]};
             gen_squares(ps, squares[i * 2], squares[i * 2 + 1]);
         }
-        // Find smallest
+        // Find smallest/biggest
         for (int i = 0; i < 6; i++)
         {
             double a = squares[i].calc_area();
-            if (a < area)
+            if (a > area_b)
+            {
+                biggest = i;
+                area_b = a;
+            }
+            if(a < area_s)
             {
                 smallest = i;
-                area = a;
+                area_s = a;
             }
             // Output square stuff
             print_square(squares[i]);
         }
-        auto ssquare = squares[smallest];
+        auto b_square = squares[biggest];
+        auto s_square = squares[smallest];
         // Draw squares
-        l1 = Line(ssquare.get_p1(), ssquare.get_p2());
-        l1.extend(0, 1);
-        l1.draw(image, 0, 255, 0);
-        l2 = Line(ssquare.get_p2(), ssquare.get_p4());
-        l2.extend(0, 1);
-        l2.draw(image, 0, 255, 125);
-        l3 = Line(ssquare.get_p3(), ssquare.get_p4());
-        l3.extend(0, 1);
-        l3.draw(image, 0, 255, 255);
-        l4 = Line(ssquare.get_p3(), ssquare.get_p1());
-        l4.extend(0, 1);
-        l4.draw(image, 255, 255, 0);
-        // Draw square vertices
-        Circle(ssquare.get_p1().xpos(), ssquare.get_p1().ypos(), 2.0 / 800.0).draw(image, 255, 0, 0);
-        Circle(ssquare.get_p2().xpos(), ssquare.get_p2().ypos(), 2.0 / 800.0).draw(image, 255, 0, 0);
-        Circle(ssquare.get_p3().xpos(), ssquare.get_p3().ypos(), 2.0 / 800.0).draw(image, 255, 0, 0);
-        Circle(ssquare.get_p4().xpos(), ssquare.get_p4().ypos(), 2.0 / 800.0).draw(image, 255, 0, 0);
+        auto draw_square = [&](Square &ssquare)
+        {
+            l1 = Line(ssquare.get_p1(), ssquare.get_p2());
+            l1.extend(0, 1);
+            l1.draw(image, 0, 255, 0);
+            l2 = Line(ssquare.get_p2(), ssquare.get_p4());
+            l2.extend(0, 1);
+            l2.draw(image, 0, 255, 125);
+            l3 = Line(ssquare.get_p3(), ssquare.get_p4());
+            l3.extend(0, 1);
+            l3.draw(image, 0, 255, 255);
+            l4 = Line(ssquare.get_p3(), ssquare.get_p1());
+            l4.extend(0, 1);
+            l4.draw(image, 255, 255, 0);
+            // Draw square vertices
+            Circle(ssquare.get_p1().xpos(), ssquare.get_p1().ypos(), 2.0 / 800.0).draw(image, 255, 0, 0);
+            Circle(ssquare.get_p2().xpos(), ssquare.get_p2().ypos(), 2.0 / 800.0).draw(image, 255, 0, 0);
+            Circle(ssquare.get_p3().xpos(), ssquare.get_p3().ypos(), 2.0 / 800.0).draw(image, 255, 0, 0);
+            Circle(ssquare.get_p4().xpos(), ssquare.get_p4().ypos(), 2.0 / 800.0).draw(image, 255, 0, 0);
+        };
+        draw_square(s_square);
+        draw_square(b_square);
         // Draw points
         for(int i = 0; i < 4; i++)
         {
