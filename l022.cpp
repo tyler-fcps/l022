@@ -366,7 +366,7 @@ namespace gen_quad
         mt19937 gen(os_seed());
         uniform_real_distribution<> xy(0, 1);
         // Printing lambda
-        auto print_vec = [&](Point &point)
+        auto print_point = [&](Point &point)
         { log << "(" << point.xpos() << ", " << point.ypos() << ")"; };
 
         log << "Inital Points: ";
@@ -374,7 +374,7 @@ namespace gen_quad
         {
             p[i] = Point(xy(gen), xy(gen));
             log << "p" << i << " = ";
-            print_vec(p[i]);
+            print_point(p[i]);
             log << ", ";
         }
         log << endl;
@@ -387,7 +387,7 @@ namespace gen_quad
                 log << "Failed (" << count << "), point p" << i << " is inside the rest" << endl;
                 p[3] = Point(xy(gen), xy(gen));
                 log << "New p3 is ";
-                print_vec(p[3]);
+                print_point(p[3]);
                 log << endl;
                 count++;
                 i = 0;
@@ -408,7 +408,7 @@ namespace gen_quad
         log << "Final Points:" << endl;
         for (int i = 0; i < 4; i++)
         {
-            print_vec(p[i]);
+            print_point(p[i]);
             log << endl;
         }
 
@@ -479,8 +479,10 @@ namespace small
                 return false;
             }
             nums = string(line);
-            x = stod(nums.substr(0, 19));
-            y = stod(nums.substr(20, 19));
+            int m_ind = nums.find_first_of(',');
+            int e_ind = nums.find_first_of(')');
+            x = stod(nums.substr(0, m_ind));
+            y = stod(nums.substr(m_ind + 1, e_ind - m_ind - 1));
             points[i] = ppm::Point(x, y);
         }
         point_file.close();
@@ -518,19 +520,51 @@ namespace small
 
     void output_smallest_square()
     {
-        // Read points
         Point points[4];
-        read_points(points);
-        // Gen all 6 squares
         Square squares[6];
+        Line l1, l2, l3, l4;
+        int smallest = 0;
+        double area = 1;
+        Image *image = new Image("output.ppm");
+        ofstream output("output.txt");
+        output << fixed << setprecision(17);
+        auto print_point = [&](Point &point)
+        { output << "(" << point.xpos() << "," << point.ypos() << ")"; };
+        auto print_square = [&](Square &square)
+        {
+            output << "(" << square.get_p1().xpos() << "," << square.get_p1().ypos() << ")";
+            output << " , ";
+            output << "(" << square.get_p2().xpos() << "," << square.get_p2().ypos() << ")";
+            output << " , ";
+            output << "(" << square.get_p3().xpos() << "," << square.get_p3().ypos() << ")";
+            output << " , ";
+            output << "(" << square.get_p4().xpos() << "," << square.get_p4().ypos() << ")";
+            output << " Area = " << square.calc_area() << endl;
+        };
+        // Read/print points
+        read_points(points);
+        // Draw points
+        for (int i = 0; i < 4; i++)
+        {
+            print_point(points[i]);
+            if (i != 3)
+            {
+                output << " , ";
+            }
+            else
+            {
+                output << endl;
+            }
+            Circle p(points[i].xpos(), points[i].ypos(), 3.0 / 800.0);
+            p.draw(image, 255, 0, 0);
+        }
+        // Gen all 6 squares
         for (int i = 0; i < 3; i++)
         {
             Point ps[] = {points[3], points[(i + 0) % 3], points[(i + 1) % 3], points[(i + 2) % 3]};
             gen_squares(ps, squares[i * 2], squares[i * 2 + 1]);
         }
         // Find smallest
-        int smallest = 0;
-        double area = 1;
         for (int i = 0; i < 6; i++)
         {
             double a = squares[i].calc_area();
@@ -539,22 +573,16 @@ namespace small
                 smallest = i;
                 area = a;
             }
+            // Output square stuff
+            print_square(squares[i]);
         }
         auto ssquare = squares[smallest];
-        // Output stuff
-        Image *image = new Image("output.ppm");
-        // Draw points
-        for (int i = 0; i < 4; i++)
-        {
-            Circle p(points[i].xpos(), points[i].ypos(), 3.0 / 800.0);
-            p.draw(image, 255, 0, 0);
-        }
+        // Draw square vertices
         Circle(ssquare.get_p1().xpos(), ssquare.get_p1().ypos(), 5.0 / 800.0).draw(image, 255, 255, 0);
         Circle(ssquare.get_p2().xpos(), ssquare.get_p2().ypos(), 5.0 / 800.0).draw(image, 255, 255, 0);
         Circle(ssquare.get_p3().xpos(), ssquare.get_p3().ypos(), 5.0 / 800.0).draw(image, 255, 255, 0);
         Circle(ssquare.get_p4().xpos(), ssquare.get_p4().ypos(), 5.0 / 800.0).draw(image, 255, 255, 0);
         // Draw squares
-        Line l1, l2, l3, l4;
         l1 = Line(ssquare.get_p1(), ssquare.get_p2());
         l1.extend(0, 1);
         l1.draw(image, 0, 255, 0);
