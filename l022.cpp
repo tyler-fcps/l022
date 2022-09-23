@@ -524,7 +524,7 @@ namespace small
         Square squares[6];
         Line l1, l2, l3, l4;
         int smallest = 0;
-        double area = 1;
+        double area = 0;
         Image *image = new Image("output.ppm");
         ofstream output("output.txt");
         output << fixed << setprecision(17);
@@ -567,7 +567,7 @@ namespace small
         for (int i = 0; i < 6; i++)
         {
             double a = squares[i].calc_area();
-            if (a < area)
+            if (a > area)
             {
                 smallest = i;
                 area = a;
@@ -595,7 +595,7 @@ namespace small
         Circle(ssquare.get_p3().xpos(), ssquare.get_p3().ypos(), 2.0 / 800.0).draw(image, 255, 0, 0);
         Circle(ssquare.get_p4().xpos(), ssquare.get_p4().ypos(), 2.0 / 800.0).draw(image, 255, 0, 0);
         // Draw points
-        for(int i = 0; i < 4; i++)
+        for (int i = 0; i < 4; i++)
         {
             Circle(points[i].xpos(), points[i].ypos(), 3.0 / 800.0).draw(image, 139, 0, 139);
         }
