@@ -7,3 +7,7 @@ cat log.txt
 echo ""
 echo "Points:"
 cat points.txt
+echo ""
+echo "Output: "
+cat output.txt
+convert output.ppm output.png

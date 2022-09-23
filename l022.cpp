@@ -541,11 +541,12 @@ namespace small
             output << "(" << square.get_p4().xpos() << "," << square.get_p4().ypos() << ")";
             output << " Area = " << square.calc_area() << endl;
         };
-        // Read/print points
+        // Read points
         read_points(points);
-        // Draw points
+        // Print points
         for (int i = 0; i < 4; i++)
         {
+            // Print Points
             print_point(points[i]);
             if (i != 3)
             {
@@ -555,8 +556,6 @@ namespace small
             {
                 output << endl;
             }
-            Circle p(points[i].xpos(), points[i].ypos(), 3.0 / 800.0);
-            p.draw(image, 255, 0, 0);
         }
         // Gen all 6 squares
         for (int i = 0; i < 3; i++)
@@ -577,11 +576,6 @@ namespace small
             print_square(squares[i]);
         }
         auto ssquare = squares[smallest];
-        // Draw square vertices
-        Circle(ssquare.get_p1().xpos(), ssquare.get_p1().ypos(), 5.0 / 800.0).draw(image, 255, 255, 0);
-        Circle(ssquare.get_p2().xpos(), ssquare.get_p2().ypos(), 5.0 / 800.0).draw(image, 255, 255, 0);
-        Circle(ssquare.get_p3().xpos(), ssquare.get_p3().ypos(), 5.0 / 800.0).draw(image, 255, 255, 0);
-        Circle(ssquare.get_p4().xpos(), ssquare.get_p4().ypos(), 5.0 / 800.0).draw(image, 255, 255, 0);
         // Draw squares
         l1 = Line(ssquare.get_p1(), ssquare.get_p2());
         l1.extend(0, 1);
@@ -595,6 +589,16 @@ namespace small
         l4 = Line(ssquare.get_p3(), ssquare.get_p1());
         l4.extend(0, 1);
         l4.draw(image, 255, 255, 0);
+        // Draw square vertices
+        Circle(ssquare.get_p1().xpos(), ssquare.get_p1().ypos(), 2.0 / 800.0).draw(image, 255, 0, 0);
+        Circle(ssquare.get_p2().xpos(), ssquare.get_p2().ypos(), 2.0 / 800.0).draw(image, 255, 0, 0);
+        Circle(ssquare.get_p3().xpos(), ssquare.get_p3().ypos(), 2.0 / 800.0).draw(image, 255, 0, 0);
+        Circle(ssquare.get_p4().xpos(), ssquare.get_p4().ypos(), 2.0 / 800.0).draw(image, 255, 0, 0);
+        // Draw points
+        for(int i = 0; i < 4; i++)
+        {
+            Circle(points[i].xpos(), points[i].ypos(), 3.0 / 800.0).draw(image, 139, 0, 139);
+        }
         // Output PPM
         image->output();
         // Close resources
