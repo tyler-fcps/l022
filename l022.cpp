@@ -332,7 +332,7 @@ namespace ppm
     };
 }
 
-namespace gen_quad
+namespace quad
 {
     using ppm::Point;
 
@@ -355,7 +355,7 @@ namespace gen_quad
         return !neg || !pos;
     }
 
-    void gen_quad()
+    void part1()
     {
         // Open log
         ofstream log("log.txt");
@@ -420,10 +420,10 @@ namespace gen_quad
 
 namespace small
 {
-    using gen_quad::Point;
     using ppm::Circle;
     using ppm::Image;
     using ppm::Line;
+    using quad::Point;
 
     class Square
     {
@@ -518,7 +518,7 @@ namespace small
         s2 = gen_square(e2);
     }
 
-    void output_smallest_square()
+    void part2()
     {
         Point points[4];
         Square squares[6];
@@ -595,7 +595,7 @@ namespace small
         Circle(ssquare.get_p3().xpos(), ssquare.get_p3().ypos(), 2.0 / 800.0).draw(image, 255, 0, 0);
         Circle(ssquare.get_p4().xpos(), ssquare.get_p4().ypos(), 2.0 / 800.0).draw(image, 255, 0, 0);
         // Draw points
-        for(int i = 0; i < 4; i++)
+        for (int i = 0; i < 4; i++)
         {
             Circle(points[i].xpos(), points[i].ypos(), 3.0 / 800.0).draw(image, 139, 0, 139);
         }
@@ -609,9 +609,9 @@ namespace small
 int main()
 {
     // Gen quad
-    gen_quad::gen_quad();
+    // quad::part1();
     // Smallest square
-    small::output_smallest_square();
+    small::part2();
     //
     return 0;
 }
