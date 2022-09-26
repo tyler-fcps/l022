@@ -609,7 +609,7 @@ namespace small
 int main()
 {
     // Gen quad
-    // quad::part1();
+    quad::part1();
     // Smallest square
     small::part2();
     //

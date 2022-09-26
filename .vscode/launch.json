@@ -7,8 +7,7 @@
         {
             "type": "lldb",
             "request": "launch",
-            "preLaunchTask": "C/C++: clang++.exe build active file",
-            "name": "Debug",
+            "name": "Launch",
             "program": "${workspaceFolder}/l022.exe",
             "args": [],
             "cwd": "${workspaceFolder}"
