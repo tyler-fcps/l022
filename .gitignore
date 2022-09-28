@@ -37,6 +37,7 @@
 /.ipynb_checkpoints/*
 output.ppm
 output.jpeg
+output.png
 output.txt
 points.txt
 log.txt
